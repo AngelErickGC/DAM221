@@ -1,94 +1,82 @@
-// ==========================================
-// MÓDULO COCINA - Gestión de Productos
-// ==========================================
-
-// Productos de cafetería por defecto
-let productos = JSON.parse(localStorage.getItem("productosCafeteria")) || [
-    { id: 1, nombre: "Café Americano", precio: 2.50 },
-    { id: 2, nombre: "Capuchino", precio: 3.50 },
-    { id: 3, nombre: "Latte Vainilla", precio: 4.00 },
-    { id: 4, nombre: "Expreso Doble", precio: 3.00 },
-    { id: 5, nombre: "Té Verde", precio: 2.50 },
-    { id: 6, nombre: "Té Chai", precio: 3.20 },
-    { id: 7, nombre: "Croissant", precio: 2.00 },
-    { id: 8, nombre: "Muffin Arándano", precio: 2.80 },
-    { id: 9, nombre: "Cheesecake", precio: 4.50 }
+let productos = [
+    { id: 1, nombre: "Café Americano", precio: 35.00 },
+    { id: 2, nombre: "Capuchino", precio: 45.00 },
+    { id: 3, nombre: "Latte Vainilla", precio: 50.00 },
+    { id: 4, nombre: "Croissant", precio: 30.00 },
+    { id: 5, nombre: "Muffin de Arándano", precio: 32.00 }
 ];
 
-// Guardar en localStorage
-function guardarEnMemoria() {
-    localStorage.setItem("productosCafeteria", JSON.stringify(productos));
-}
 
-// Listar productos
-function listarProductosCrud() {
-    let lista = document.getElementById("listaProductosCrud");
-    
+function listarProductos() {
+    console.log("\n--- CATÁLOGO DE COCINA ---");
     if (productos.length === 0) {
-        lista.innerHTML = '<p>No hay productos.</p>';
+        console.log("No hay productos disponibles.");
         return;
     }
 
-    lista.innerHTML = "";
-    productos.forEach(producto => {
-        lista.innerHTML += `
-            <div class="producto-item">
-                <span>ID: ${producto.id} - ${producto.nombre} - $${producto.precio.toFixed(2)}</span>
-                <div class="producto-acciones">
-                    <button onclick="editar(${producto.id})">Editar</button>
-                    <button onclick="eliminar(${producto.id})">Eliminar</button>
-                </div>
-            </div>
-        `;
+    productos.forEach(prod => {
+        console.log(`[ID: ${prod.id}] ${prod.nombre} - $${prod.precio.toFixed(2)}`);
     });
 }
 
-// Agregar producto
-function agregarProducto() {
-    let nombre = document.getElementById("crudNombre").value;
-    let precio = document.getElementById("crudPrecio").value;
 
-    if (nombre === "" || precio === "") {
-        alert("Escribe el nombre y el precio");
+function agregarProducto(nombre, precio) {
+    if (!nombre || isNaN(precio) || precio <= 0) {
+        console.log("Error: Nombre o precio inválido.");
         return;
     }
 
-    let producto = {
-        id: productos.length > 0 ? Math.max(...productos.map(p => p.id)) + 1 : 1,
+    const nuevoId = productos.length > 0 ? Math.max(...productos.map(p => p.id)) + 1 : 1;
+    
+
+    const nuevoProducto = {
+        id: nuevoId,
         nombre: nombre,
-        precio: Number(precio)
+        precio: parseFloat(precio)
     };
 
-    productos.push(producto);
-    guardarEnMemoria();
-
-    document.getElementById("crudNombre").value = "";
-    document.getElementById("crudPrecio").value = "";
-
-    listarProductosCrud();
+    productos.push(nuevoProducto);
+    console.log(`Producto "${nombre}" agregado correctamente con ID ${nuevoId}.`);
 }
 
-// Editar producto
-function editar(id) {
-    let producto = productos.find(p => p.id === id);
-    if (!producto) return;
 
-    let nombre = prompt("Nuevo nombre:", producto.nombre);
-    let precio = prompt("Nuevo precio:", producto.precio);
+function editarProducto(id, nuevoNombre, nuevoPrecio) {
+    const producto = productos.find(p => p.id === id);
 
-    if (nombre !== null && precio !== null) {
-        producto.nombre = nombre;
-        producto.precio = Number(precio);
-        guardarEnMemoria();
-        listarProductosCrud();
+    if (!producto) {
+        console.log(`No se encontró el producto con ID ${id}.`);
+        return;
     }
+
+    if (nuevoNombre) producto.nombre = nuevoNombre;
+    if (nuevoPrecio && !isNaN(nuevoPrecio) && nuevoPrecio > 0) {
+        producto.precio = parseFloat(nuevoPrecio);
+    }
+
+    console.log(`Producto ID ${id} actualizado con éxito.`);
 }
 
-// Eliminar producto
-function eliminar(id) {
-    if (!confirm("¿Eliminar este producto?")) return;
-    
+
+function eliminarProducto(id) {
+    const existe = productos.some(p => p.id === id);
+    if (!existe) {
+        console.log(`No se encontró el producto con ID ${id}.`);
+        return;
+    }
+
     productos = productos.filter(p => p.id !== id);
-    guardarEnMemoria();
-    listarProductosCrud();
+    console.log(`Producto ID ${id} eliminado del catálogo.`);
 }
+
+function obtenerCatalogo() {
+    return productos;
+}
+
+module.exports = {
+    productos,
+    listarProductos,
+    agregarProducto,
+    editarProducto,
+    eliminarProducto,
+    obtenerCatalogo
+};

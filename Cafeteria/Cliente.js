@@ -1,91 +1,88 @@
-// Carrito del cliente
-let carritoCliente = [];
-let totalCliente = 0;
+const { obtenerCatalogo } = require("./Cocina");
+
+let pedidoCliente = [];
 let contadorTickets = 1;
 
-// Renderizar el menú del cliente
-function renderizarMenuCliente() {
-    const productos = JSON.parse(localStorage.getItem("productosCafeteria")) || [];
-    const grid = document.getElementById("gridProductosCliente");
-    
-    if (productos.length === 0) {
-        grid.innerHTML = '<p>El menú está vacío. Ve a Cocina para agregar productos.</p>';
-        return;
-    }
 
-    // Cada producto es clickeable para agregarlo al carrito
-    grid.innerHTML = productos.map(prod => `
-        <div class="producto" onclick="agregarAlCarrito(${prod.id})">
-            <strong>${prod.nombre}</strong><br>
-            $${prod.precio.toFixed(2)}
-        </div>
-    `).join('');
-}
+function consultarProductos() {
+    const catalogo = obtenerCatalogo();
 
-// Agregar producto al carrito al hacer clic
-function agregarAlCarrito(idProducto) {
-    const productos = JSON.parse(localStorage.getItem("productosCafeteria")) || [];
-    const producto = productos.find(p => p.id === idProducto);
-    if (!producto) return;
+    console.log(`\n========================================`);
+    console.log(`         MENÚ DE LA CAFETERÍA      `);
+    console.log(`========================================`);
 
-    // Si ya está en el carrito, aumentamos la cantidad
-    const itemExistente = carritoCliente.find(item => item.id === idProducto);
-    if (itemExistente) {
-        itemExistente.cantidad++;
-    } else {
-        carritoCliente.push({ ...producto, cantidad: 1 });
-    }
-
-    totalCliente += producto.precio;
-    renderizarCarritoCliente();
-    mostrarNotificacion(`${producto.nombre} agregado`);
-}
-
-// Mostrar el carrito del cliente
-function renderizarCarritoCliente() {
-    document.getElementById("totalCliente").textContent = totalCliente.toFixed(2);
-    const lista = document.getElementById("listaCliente");
-
-    if (carritoCliente.length === 0) {
-        lista.innerHTML = '<p>Sin productos.</p>';
-        return;
-    }
-
-    lista.innerHTML = carritoCliente.map(item => `
-        <li>${item.cantidad}x ${item.nombre} - $${(item.precio * item.cantidad).toFixed(2)}</li>
-    `).join('');
-}
-
-// Confirmar pedido (Envía a Caja)
-function confirmarPedidoCliente() {
-    if (carritoCliente.length === 0) {
-        mostrarNotificacion("Selecciona al menos un producto");
-        return;
-    }
-
-    const numeroFormateado = `#${String(contadorTickets).padStart(3, '0')}`;
-    document.getElementById("numeroTicket").textContent = numeroFormateado;
-
-    // Guardamos el pedido en localStorage para que la Caja lo vea
-    let pedidosPendientes = JSON.parse(localStorage.getItem("pedidosPendientes")) || [];
-    pedidosPendientes.push({
-        ticket: numeroFormateado,
-        items: [...carritoCliente],
-        total: totalCliente
+    catalogo.forEach(producto => {
+        console.log(`ID: [${producto.id}] | Producto: ${producto.nombre} | Precio: $${producto.precio.toFixed(2)}`);
     });
-    localStorage.setItem("pedidosPendientes", JSON.stringify(pedidosPendientes));
 
-    document.getElementById("modalTicket").style.display = "block";
+    console.log(`========================================`);
+}
+
+function crearPedidoProducto(idProducto, cantidad = 1) {
+    const catalogo = obtenerCatalogo();
+    const itemEncontrado = catalogo.find(p => p.id === idProducto);
+
+    if (!itemEncontrado) {
+        console.log(`El producto con ID ${idProducto} no existe.`);
+        return;
+    }
+
+    const itemEnCarrito = pedidoCliente.find(item => item.id === idProducto);
+
+    if (itemEnCarrito) {
+        itemEnCarrito.cantidad += cantidad;
+    } else {
+        pedidoCliente.push({
+            id: itemEncontrado.id,
+            nombre: itemEncontrado.nombre,
+            precio: itemEncontrado.precio,
+            cantidad: cantidad
+        });
+    }
+
+    console.log(`Añadido: ${cantidad}x ${itemEncontrado.nombre} al pedido.`);
+}
+
+
+function listarPedidos() {
+    console.log(`\n--- PEDIDO ACTUAL DEL CLIENTE ---`);
+    if (pedidoCliente.length === 0) {
+        console.log(`El carrito está vacío.`);
+        return;
+    }
+
+    let subtotal = 0;
+    pedidoCliente.forEach(item => {
+        const totalItem = item.precio * item.cantidad;
+        subtotal += totalItem;
+        console.log(`- ${item.cantidad}x ${item.nombre} = $${totalItem.toFixed(2)}`);
+    });
+
+    console.log(`Subtotal preliminar: $${subtotal.toFixed(2)}`);
+}
+
+
+function enviarOrdenACaja() {
+    if (pedidoCliente.length === 0) {
+        console.log(`No se puede enviar un pedido vacío.`);
+        return null;
+    }
+
+    const folio = `#${String(contadorTickets).padStart(3, "0")}`;
+    const ordenCompleta = {
+        ticket: folio,
+        items: [...pedidoCliente]
+    };
+
+    console.log(`\n¡Orden confirmada! Folio asignado: ${folio}`);
     contadorTickets++;
-
-    // Refrescamos la Caja
-    if (typeof renderizarTicketCaja === 'function') renderizarTicketCaja();
+    pedidoCliente = [];  
+    return ordenCompleta;
 }
 
-// Cerrar modal
-function cerrarModalTicket() {
-    document.getElementById("modalTicket").style.display = "none";
-    carritoCliente = [];
-    totalCliente = 0;
-    renderizarCarritoCliente();
-}
+module.exports = {
+    consultarProductos,
+    crearPedidoProducto,
+    listarPedidos,
+    enviarOrdenACaja
+};

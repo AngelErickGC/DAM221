@@ -1,86 +1,97 @@
-// Variables de la Caja
-let pedidoCaja = [];
-let totalCaja = 0;
+let listaPedidos = [];       
+const TASA_IVA = 0.16;       
 
-// Al cargar, recuperamos los pedidos pendientes del Cliente
-function cargarPedidosPendientes() {
-    const pedidosPendientes = JSON.parse(localStorage.getItem("pedidosPendientes")) || [];
-    
-    pedidosPendientes.forEach(pedido => {
-        pedidoCaja.push(pedido);
-        totalCaja += pedido.total;
+
+function agregarPedido(nombre, precio) {
+    const precioNum = parseFloat(precio);
+
+    if (!nombre || isNaN(precioNum) || precioNum <= 0) {
+        console.log("Error: Debes ingresar un nombre y un precio válido.");
+        return;
+    }
+
+  
+    listaPedidos.push({
+        producto: nombre,
+        precio: precioNum
     });
 
-    // Limpiamos el localStorage de pedidos pendientes
-    localStorage.removeItem("pedidosPendientes");
-    renderizarTicketCaja();
+    console.log(`Pedido agregado a caja: ${nombre} - $${precioNum.toFixed(2)}`);
 }
 
-// Agregar producto manual (Cajera)
-function agregarPedido() {
-    const nombreProducto = document.getElementById("producto").value.trim();
-    const precio = parseFloat(document.getElementById("precio").value);
 
-    if (nombreProducto === "" || isNaN(precio)) {
-        mostrarNotificacion("Completa los campos");
+function recibirOrdenCliente(orden) {
+    if (!orden || !orden.items) return;
+
+    orden.items.forEach(item => {
+        
+        const { nombre, precio, cantidad } = item;
+        listaPedidos.push({
+            producto: `${cantidad}x ${nombre} (${orden.ticket})`,
+            precio: precio * cantidad
+        });
+    });
+
+    console.log(`Comanda ${orden.ticket} cargada con éxito a la caja.`);
+}
+
+
+function calcularTotales() {
+
+    const subtotal = listaPedidos.reduce((acumulador, { precio }) => acumulador + precio, 0);
+    const iva = subtotal * TASA_IVA;
+    const total = subtotal + iva;
+
+
+    return { subtotal, iva, total };
+}
+
+
+function mostrarResumenCaja() {
+    console.log(`\n========================================`);
+    console.log(`           🧾 TICKET DE CAJA            `);
+    console.log(`========================================`);
+
+    if (listaPedidos.length === 0) {
+        console.log(`No hay productos registrados en caja.`);
+        console.log(`========================================`);
         return;
     }
-    if (precio < 0.50) {
-        mostrarNotificacion("Precio mínimo: $0.50");
-        return;
-    }
-    if (precio > 500.00) {
-        mostrarNotificacion("Precio máximo: $500.00");
-        return;
-    }
 
-    pedidoCaja.push({ producto: nombreProducto, precio: precio });
-    totalCaja += precio;
+ 
+    listaPedidos.forEach(({ producto, precio }) => {
+        console.log(`• ${producto.padEnd(26, " ")} $${precio.toFixed(2)}`);
+    });
 
-    renderizarTicketCaja();
-    mostrarNotificacion(`${nombreProducto} añadido`);
     
-    document.getElementById("producto").value = "";
-    document.getElementById("precio").value = "";
-    document.getElementById("producto").focus();
+    const { subtotal, iva, total } = calcularTotales();
+
+    console.log(`----------------------------------------`);
+    console.log(`Subtotal:                 $${subtotal.toFixed(2)}`);
+    console.log(`IVA (16%):                $${iva.toFixed(2)}`);
+    console.log(`Total a Pagar:            $${total.toFixed(2)}`);
+    console.log(`========================================`);
 }
 
-// Renderizar el ticket de la Caja
-function renderizarTicketCaja() {
-    document.getElementById("totalActual").textContent = totalCaja.toFixed(2);
-    const lista = document.getElementById("listaActual");
 
-    if (pedidoCaja.length === 0) {
-        lista.innerHTML = '<p>Sin productos.</p>';
+function cobrarVenta() {
+    if (listaPedidos.length === 0) {
+        console.log("No hay nada que cobrar.");
         return;
     }
 
-    lista.innerHTML = pedidoCaja.map((item, index) => {
-        // Si el item tiene "items" es un pedido del cliente
-        if (item.items) {
-            const detalle = item.items.map(i => `${i.cantidad}x ${i.nombre}`).join(', ');
-            return `
-                <li><strong>${item.ticket}</strong>: ${detalle} - $${item.total.toFixed(2)}</li>
-            `;
-        } else {
-            // Es un pedido manual de la cajera
-            return `
-                <li>${item.producto} - $${item.precio.toFixed(2)}</li>
-            `;
-        }
-    }).join('');
-}
-
-// Cobrar y cerrar el ticket
-function cerrarPedido() {
-    if (pedidoCaja.length === 0) {
-        mostrarNotificacion("Ticket vacío");
-        return;
-    }
-
-    mostrarNotificacion(`Cobrado: $${totalCaja.toFixed(2)}`);
+    const { total } = calcularTotales();
+    console.log(`\n✅ Cobro exitoso por un total de $${total.toFixed(2)}`);
     
-    pedidoCaja = [];
-    totalCaja = 0;
-    renderizarTicketCaja();
+    
+    listaPedidos = [];
+    console.log("Caja lista para la siguiente transacción.");
 }
+
+module.exports = {
+    agregarPedido,
+    recibirOrdenCliente,
+    calcularTotales,
+    mostrarResumenCaja,
+    cobrarVenta
+};
