@@ -1,92 +1,104 @@
-const { obtenerCatalogo, buscarProducto } = require("./cocina");
+const Cocina = require("./cocina");
 
-// Variables del cliente
 let carritoCliente = [];
-let contadorTickets = 1;
 
 function consultarProductos() {
-    const catalogo = obtenerCatalogo();
+  const catalogo = Cocina.obtenerCatalogo();
 
-    console.log(`\n========================================`);
-    console.log(`         MENÚ DE LA CAFETERÍA           `);
-    console.log(`========================================`);
+  console.log("\n========================================");
+  console.log("         MENÚ DE LA CAFETERÍA           ");
+  console.log("========================================");
 
-    // Usamos forEach para recorrer el catálogo
-    catalogo.forEach(producto => {
-        console.log(
-            `ID: [${producto.id}] | ${producto.nombre} | $${producto.precio.toFixed(2)} | ${producto.categoria}`
-        );
-    });
+  catalogo.forEach(p => {
+    const estado = p.disponible ? "DISPONIBLE" : "AGOTADO   ";
+    console.log(`[${p.id}] ${estado} | ${p.nombre} | $${p.precio.toFixed(2)} | ${p.categoria}`);
+  });
 
-    console.log(`========================================`);
+  console.log("========================================\n");
+}
+
+function mostrarPromociones() {
+  const promos = Cocina.obtenerCatalogo().filter(p => p.promo);
+  console.log("\n---------- PROMOCIONES DEL DÍA ----------");
+  if (promos.length === 0) {
+    console.log("No hay promociones hoy.");
+  } else {
+    promos.forEach(p => console.log(`${p.nombre} -> ${p.promo}`));
+  }
+  console.log("-----------------------------------------\n");
+}
+
+function mostrarDisponibles() {
+  const disponibles = Cocina.obtenerCatalogo().filter(p => p.disponible);
+  console.log("\n---------- PRODUCTOS DISPONIBLES ----------");
+  disponibles.forEach(d => console.log(`${d.nombre} - $${d.precio.toFixed(2)}`));
+  console.log("-------------------------------------------\n");
 }
 
 function crearPedidoProducto(idProducto, cantidad = 1) {
-    const itemEncontrado = buscarProducto(idProducto);
+  const item = Cocina.buscarProducto(idProducto);
 
-    if (!itemEncontrado) {
-        console.log(`El producto con ID ${idProducto} no existe.`);
-        return;
-    }
+  if (!item) {
+    console.log(`✗ El producto con ID ${idProducto} no existe.`);
+    return false;
+  }
+  if (!item.disponible) {
+    console.log(`✗ ${item.nombre} no está disponible ahora.`);
+    return false;
+  }
 
-    const itemEnCarrito = carritoCliente.find(item => item.id === idProducto);
-
-    if (itemEnCarrito) {
-        itemEnCarrito.cantidad += cantidad;
-    } else {
-        carritoCliente.push({
-            id: itemEncontrado.id,
-            nombre: itemEncontrado.nombre,
-            precio: itemEncontrado.precio,
-            cantidad: cantidad
-        });
-    }
-
-    console.log(`Añadido: ${cantidad}x ${itemEncontrado.nombre} al pedido.`);
-}
-function listarPedidos() {
-    console.log(`\n--- PEDIDO ACTUAL DEL CLIENTE ---`);
-
-    if (carritoCliente.length === 0) {
-        console.log(`El carrito está vacío.`);
-        return;
-    }
-
-    let subtotal = 0;
-
-    carritoCliente.forEach(item => {
-        const totalItem = item.precio * item.cantidad;
-        subtotal += totalItem;
-        console.log(`- ${item.cantidad}x ${item.nombre} = $${totalItem.toFixed(2)}`);
+  const enCarrito = carritoCliente.find(i => i.id === idProducto);
+  if (enCarrito) {
+    enCarrito.cantidad += cantidad;
+  } else {
+    carritoCliente.push({
+      id: item.id,
+      nombre: item.nombre,
+      precio: item.precio,
+      cantidad: cantidad
     });
+  }
 
-    console.log(`Subtotal preliminar: $${subtotal.toFixed(2)}`);
+  console.log(`✓ Añadido: ${cantidad}x ${item.nombre} al pedido.`);
+  return true;
 }
 
-function enviarOrdenACaja() {
-    if (carritoCliente.length === 0) {
-        console.log(`No se puede enviar un pedido vacío.`);
-        return null;
-    }
+function listarPedidos() {
+  console.log("\n--- PEDIDO ACTUAL DEL CLIENTE ---");
+  if (carritoCliente.length === 0) {
+    console.log("El carrito está vacío.");
+    console.log("---------------------------------\n");
+    return 0;
+  }
 
-    const folio = `#${String(contadorTickets).padStart(3, "0")}`;
+  let subtotal = 0;
+  carritoCliente.forEach(item => {
+    const total = item.precio * item.cantidad;
+    subtotal += total;
+    console.log(`- ${item.cantidad}x ${item.nombre} = $${total.toFixed(2)}`);
+  });
 
-    const ordenCompleta = {
-        ticket: folio,
-        items: [...carritoCliente]
-    };
+  console.log(`Subtotal preliminar: $${subtotal.toFixed(2)}`);
+  console.log("---------------------------------\n");
+  return subtotal;
+}
 
-    console.log(`\n¡Orden confirmada! Folio asignado: ${folio}`);
+function vaciarYDevolverCarrito() {
+  const pedidoFinal = [...carritoCliente];
+  carritoCliente = [];
+  return pedidoFinal;
+}
 
-    contadorTickets++;
-    carritoCliente = []; 
-
-    return ordenCompleta;
+function verCarrito() {
+  return carritoCliente;
 }
 
 module.exports = {
-    consultarProductos,
-    crearPedidoProducto,
-    listarPedidos,
-    enviarOrdenACaja
+  consultarProductos,
+  mostrarPromociones,
+  mostrarDisponibles,
+  crearPedidoProducto,
+  listarPedidos,
+  vaciarYDevolverCarrito,
+  verCarrito
 };
