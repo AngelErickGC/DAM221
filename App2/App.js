@@ -41,10 +41,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
-    
-    flexDirection: 'column',
+  
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'space-evenly',
   },
   tarjetas1:{backgroundColor: 'lightgray'},
   tarjetas2:{backgroundColor: 'lightblue'},
