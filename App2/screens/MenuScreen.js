@@ -1,11 +1,10 @@
-
 /* 1. Zona imporyaciones */
 import { StyleSheet, View, Text, Button } from 'react-native';
-import { useState } from 'react'; 
+import { useState } from 'react';
 import TarjetasScreen from './TarjetasScreen';
 import SafeScreen from './SafeScreen';
-import PressableScreen from './PracticaPressable';
-import TextInputAlert from  './TextInputAlert';
+import PressableScreen from './PressableScreen';
+import TextInputAlert from './TextInputAlert';
 import FlatListSectionList from './FlatListSectionList';
 import ImageBackgroungSlapshScreen from './ImageBackgroungSlapshScreen';
 import ModalBottomSheet from './ModalBottomSheet';
@@ -16,12 +15,12 @@ export default function MenuScreen() {
     const [screen, setScreen] = useState('menu');
 
     switch (screen) {
-        case'tarjetas':
-            return <TarjetasScreen/>;
-        case'safe':
-            return <SafeScreen/>;
-        case'menu':
-            defeault:
+        case 'tarjetas':
+            return <TarjetasScreen />;
+        case 'safe':
+            return <SafeScreen />;
+        case 'menu':
+        default:
             return (
                 <View style={styles.container}>
                     <Text> Menu de Practicas </Text>
@@ -35,20 +34,20 @@ export default function MenuScreen() {
                     <Button title="Pract:ActivityIndicatorKeyboardAvoidingView" onPress={() => setScreen('activityIndicatorKeyboardAvoidingView')}> </Button>
                 </View>
             );
-        }
     }
+}
 
 
 
 /* 3. Zona de Estilos */
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'space-evenly',
-  },
+    container: {
+        flex: 1,
+        backgroundColor: '#fff',
+
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'space-evenly',
+    },
 
 });
