@@ -1,36 +1,16 @@
 
 /* 1. Zona imporyaciones */
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View, Image } from 'react-native';
-import { Saludo } from './components/Saludo';
-import { Saludo2 } from './components/Saludo2';
-import { Perfil } from './components/Perfil';
+import { StyleSheet, View,  } from 'react-native';
+import MenuScreen from './screens/MenuScreen';
 
 /* 2. Zona Render o Main */
 export default function App() {
   return (
+    
     <View style={styles.container}>
-      {/* <Text>Hola Mundo React Native!</Text>
-      <Image source={require('./assets/wave.png')} />
 
-         <Text>_________________________________</Text>
-
-         <Saludo></Saludo>
-         <Saludo/>
-
-          <Text>_________________________________</Text>
-
-         <Saludo2></Saludo2>
-         <Saludo2/>
- */}
-      
-      <Perfil style={styles.tarjetas1} nombre="Lia" carrera="Tecnologías de la Información e Innovación Digital"  materia="Desarrollo de Aplicaciones Móviles" cuatri="4"  />
-
-      <Perfil style={styles.tarjetas2} nombre="Angel" carrera="Tecnologías de la Información e Innovación Digital"  materia="Desarrollo de Aplicaciones Móviles" cuatri="4" />
-
-      <Perfil style={styles.tarjetas3} nombre="Erick" carrera="Tecnologías de la Información e Innovación Digital"  materia="Desarrollo de Aplicaciones Móviles" cuatri="4" />
-
-      <StatusBar style="auto" />
+      <MenuScreen></MenuScreen>
+  
     </View>
   );
 }
@@ -46,8 +26,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-evenly',
   },
-  tarjetas1:{backgroundColor: 'lightgray'},
-  tarjetas2:{backgroundColor: 'lightblue'},
-  tarjetas3:{backgroundColor: 'lightgreen'},
 
 });
