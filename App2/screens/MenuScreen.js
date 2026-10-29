@@ -19,7 +19,10 @@ export default function MenuScreen() {
             return <TarjetasScreen />;
         case 'safe':
             return <SafeScreen />;
+        case 'pressable':
+            return <PressableScreen />;
         case 'menu':
+
         default:
             return (
                 <View style={styles.container}>
