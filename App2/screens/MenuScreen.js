@@ -21,6 +21,8 @@ export default function MenuScreen() {
             return <SafeScreen />;
         case 'pressable':
             return <PressableScreen />;
+        case 'textInputAlert':
+            return <TextInputAlert />;
         case 'menu':
 
         default:
