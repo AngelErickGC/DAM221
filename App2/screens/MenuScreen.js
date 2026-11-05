@@ -23,6 +23,14 @@ export default function MenuScreen() {
             return <PressableScreen />;
         case 'textInputAlert':
             return <TextInputAlert />;
+        case 'flatListSectionList':
+            return <FlatListSectionList />;
+        case 'imageBackgroundSplashScreen':
+            return <ImageBackgroundSplashScreen />;
+        case 'modalBottomSheet':
+            return <ModalBottomSheet />;
+        case 'activityIndicatorKeyboardAvoidingView':
+            return <ActivityIndicatorKeyboardAvoidingView />;
         case 'menu':
 
         default:
