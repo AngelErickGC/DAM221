@@ -6,7 +6,7 @@ import SafeScreen from './SafeScreen';
 import PressableScreen from './PressableScreen';
 import TextInputAlert from './TextInputAlert';
 import FlatListSectionList from './FlatListSectionList';
-import ImageBackgroungSlapshScreen from './ImageBackgroungSlapshScreen';
+import ImageBackgroundSplashScreen from './ImageBackgroungSlapshScreen';
 import ModalBottomSheet from './ModalBottomSheet';
 import ActivityIndicatorKeyboardAvoidingView from './ActivityIndicatorKeyboardAvoidingView';
 
