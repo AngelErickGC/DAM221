@@ -1,17 +1,12 @@
-import React, { useState, useRef, useMemo, useCallback } from 'react';
+/**1. zona de importaciones/ */
+import { useState, useRef, useMemo, useCallback } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import {
-    FlatList,
-    Modal,
-    Pressable,
-    StatusBar,
-    StyleSheet,
-    Text,
-    TextInput,
-    View,
-} from 'react-native';
+import { View, Modal, Text, TextInput, Pressable, StyleSheet, StatusBar, FlatList, TextBase } from 'react-native';
 import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
 
+/*
+2.zona Render o Main
+*/
 export default function ModalScreen() {
     const [modalVisible, setModalVisible] = useState(false);
     const [task, setTask] = useState('');
@@ -19,8 +14,7 @@ export default function ModalScreen() {
     const [priority, setPriority] = useState('Media');
 
     const bottomSheetRef = useRef(null);
-    const newTaskInputRef = useRef(null);
-    const nextTaskId = useRef(1);
+    const nextTaskId = useRef(0);
     const snapPoints = useMemo(() => ['35%', '55%'], []);
 
     const openBottomSheet = useCallback(() => {
@@ -38,164 +32,236 @@ export default function ModalScreen() {
             {
                 id: nextTaskId.current++,
                 name: taskName,
-                priority,
-            },
+                priority
+            }
         ]);
         setTask('');
         setModalVisible(false);
     };
-
     const selectPriority = (selectedPriority) => {
         setPriority(selectedPriority);
         bottomSheetRef.current?.close();
-    };
+    }
 
     return (
-        <GestureHandlerRootView style={styles.container}>
+        <GestureHandlerRootView style={styles.root}>
             <StatusBar barStyle="dark-content" />
             <View style={styles.container}>
-                <Pressable style={styles.addButton} onPress={() => setModalVisible(true)}>
-                    <Text style={styles.addButtonText}>Agregar tarea</Text>
+                <Text style={styles.title}>Organiza tus tareas</Text>
+                <Text style={styles.subtitle}>Crear una nueva tarea</Text>
+
+                <Pressable style={styles.primaryButton} onPress={() => setModalVisible(true)}>
+                    <Text style={styles.buttonText}>Nueva tarea</Text>
                 </Pressable>
 
-                <FlatList
+                <Pressable style={styles.secondaryButton} onPress={openBottomSheet}>
+                    <Text style={styles.buttonText}>Seleccionar prioridad</Text>
+                </Pressable>
+
+                <FlatList style={styles.taskList}
+                    contentContainerStyle={styles.taskListContent}
                     data={tasks}
                     keyExtractor={(item) => item.id.toString()}
-                    renderItem={({ item }) => (
-                        <View style={styles.task}>
-                            <Text style={styles.taskName}>{item.name}</Text>
-                            <Text style={styles.priority}>{item.priority}</Text>
+                    renderItem={({ item, index }) => (
+                        <View style={styles.taskCard}>
+                            <Text style={styles.cardTitle}>Tarea {index + 1}</Text>
+                            <Text style={styles.taskText}>{item.name}</Text>
+                            <Text style={styles.priorityText}>Prioridad: {item.priority}</Text>
                         </View>
                     )}
                 />
-
-                <Modal
-                    visible={modalVisible}
-                    transparent
-                    animationType="slide"
-                    onRequestClose={() => setModalVisible(false)}
-                >
-                    <Pressable
-                        style={styles.modalOverlay}
-                        onPress={() => setModalVisible(false)}
-                    >
-                        <Pressable style={styles.modalContent} onPress={() => {}}>
-                            <Text style={styles.title}>Nueva tarea</Text>
-                            <TextInput
-                                ref={newTaskInputRef}
-                                style={styles.input}
-                                value={task}
-                                onChangeText={setTask}
-                                placeholder="Nombre de la tarea"
-                                onSubmitEditing={saveTask}
-                            />
-                            <Pressable style={styles.saveButton} onPress={saveTask}>
-                                <Text style={styles.saveButtonText}>Guardar</Text>
-                            </Pressable>
-                            <Pressable style={styles.priorityButton} onPress={openBottomSheet}>
-                                <Text>Prioridad: {priority}</Text>
-                            </Pressable>
-                        </Pressable>
-                    </Pressable>
-                </Modal>
-
-                <BottomSheet
-                    ref={bottomSheetRef}
-                    index={-1}
-                    snapPoints={snapPoints}
-                    enablePanDownToClose
-                >
-                    <BottomSheetView style={styles.bottomSheetContent}>
-                        <Text style={styles.title}>Seleccionar prioridad</Text>
-                        {['Alta', 'Media', 'Baja'].map((option) => (
-                            <Pressable
-                                key={option}
-                                style={styles.priorityOption}
-                                onPress={() => selectPriority(option)}
-                            >
-                                <Text>{option}</Text>
-                            </Pressable>
-                        ))}
-                    </BottomSheetView>
-                </BottomSheet>
             </View>
+
+            <Modal visible={modalVisible} animationType="slide"
+                transparent onRequestClose={() => setModalVisible(false)}>
+                <View style={styles.modalBackground}>
+                    <View style={styles.modalCard}>
+                        <Text style={styles.modalTitle}>Nueva tarea</Text>
+                        <Text style={styles.description}>Ingrese el nombre de la tarea</Text>
+                        <TextInput
+                            style={styles.input}
+                            placeholder="Nombre de la tarea"
+                            value={task}
+                            onChangeText={setTask}
+                        />
+                        <Pressable style={styles.primaryButton} onPress={saveTask}>
+                            <Text style={styles.buttonText}>Guardar tarea</Text>
+                        </Pressable>
+
+                        <Pressable style={styles.cancelButton} onPress={() => { setModalVisible(false) }}>
+                            <Text style={styles.cancelText}>Cancelar</Text>
+                        </Pressable>
+                    </View>
+                </View>
+            </Modal>
+
+            <BottomSheet
+                ref={bottomSheetRef}
+                index={-1}
+                snapPoints={snapPoints}
+                enablePanDownToClose
+                backgroundStyle={styles.sheetBackground}
+                handleIndicatorStyle={styles.handleIndicator}>
+                <BottomSheetView style={styles.sheetContent}>
+                    <Text style={styles.sheetTitle}>Seleccionar prioridad</Text>
+                    <Text style={styles.description}>Elige la prioridad de la tarea</Text>
+                    {['Alta', 'Media', 'Baja'].map((item) => {
+                        return (
+                            <Pressable
+                                key={item}
+                                style={[styles.priorityOption, priority === item && styles.selectedOption]}
+                                onPress={() => selectPriority(item)}
+                            >
+                                <Text style={[styles.priorityText, priority === item && styles.selectedText]}>
+                                    {item}
+                                </Text>
+                            </Pressable>
+                        );
+                    })
+                    }
+
+                </BottomSheetView>
+            </BottomSheet>
         </GestureHandlerRootView>
     );
 }
-
+/**3. zona de estilos/ */
 const styles = StyleSheet.create({
+    root: { flex: 1 },
     container: {
         flex: 1,
-        backgroundColor: '#fff',
-        padding: 16,
-    },
-    addButton: {
-        backgroundColor: '#2563eb',
-        padding: 12,
-        borderRadius: 8,
-        alignItems: 'center',
-    },
-    addButtonText: {
-        color: '#fff',
-        fontWeight: 'bold',
-    },
-    task: {
-        padding: 12,
-        borderBottomWidth: 1,
-        borderBottomColor: '#ddd',
-    },
-    taskName: {
-        fontSize: 16,
-    },
-    priority: {
-        color: '#666',
-        marginTop: 4,
-    },
-    modalOverlay: {
-        flex: 1,
-        justifyContent: 'flex-end',
-        backgroundColor: 'rgba(0, 0, 0, 0.35)',
-    },
-    modalContent: {
-        backgroundColor: '#fff',
-        padding: 20,
-        borderTopLeftRadius: 16,
-        borderTopRightRadius: 16,
+        backgroundColor: '#F4F5FB',
+        padding: 24,
+        paddingTop: 70
     },
     title: {
+        fontSize: 32,
+        fontWeight: 'bold',
+        color: '#5144D8',
+        textAlign: 'center'
+    },
+    subtitle: {
+        fontSize: 16,
+        color: '#666',
+        textAlign: 'center',
+        marginTop: 8,
+        marginBottom: 32,
+    },
+    primaryButton: {
+        backgroundColor: '#5B4AE8',
+        padding: 16,
+        borderRadius: 12,
+        alignItems: 'center',
+        marginBottom: 24
+    },
+    secondaryButton: {
+        backgroundColor: '#292640',
+        padding: 16,
+        borderRadius: 12,
+        alignItems: 'center',
+        marginBottom: 24
+    },
+    buttonText: {
+        color: '#FFF',
+        fontSize: 16,
+        fontWeight: 'bold'
+    },
+    taskCard: {
+        backgroundColor: '#FFF',
+        padding: 20,
+        borderRadius: 16,
+        elevation: 3,
+        marginBottom: 12
+    },
+    tasksList: { flex: 1 },
+    tasksListContent: { paddingBottom: 12 },
+    cardTitle: {
         fontSize: 20,
         fontWeight: 'bold',
-        marginBottom: 12,
+        color: '#333',
+        marginBottom: 12
+    },
+    taskText: {
+        fontSize: 16,
+        color: '#333',
+        marginBottom: 12
+    },
+    priorityText: {
+        fontSize: 15,
+        color: '#555'
+    },
+    modalBackground: {
+        flex: 1,
+        justifyContent: 'center',
+        padding: 24,
+        backgroundColor: 'rgba(0,0,0,0.45)'
+    },
+    modalCard: {
+        backgroundColor: '#FFF',
+        padding: 24,
+        borderRadius: 20
+    },
+    modalTitle: {
+        fontSize: 24,
+        fontWeight: 'bold',
+        color: '#5144D8',
+        marginBottom: 10
+    },
+    description: {
+        fontSize: 14,
+        color: '#777',
+        marginBottom: 18
     },
     input: {
         borderWidth: 1,
-        borderColor: '#ccc',
-        borderRadius: 8,
-        padding: 10,
+        borderColor: '#D8D5EA',
+        borderRadius: 10,
+        padding: 14,
+        fontSize: 16,
+        marginBottom: 20
     },
-    saveButton: {
-        backgroundColor: '#2563eb',
+    cancelButton: {
         padding: 12,
-        borderRadius: 8,
-        alignItems: 'center',
-        marginTop: 12,
+        alignItems: 'center'
     },
-    saveButtonText: {
-        color: '#fff',
-        fontWeight: 'bold',
+    cancelText: {
+        color: '#5144D8',
+        fontWeight: 'bold'
     },
-    priorityButton: {
-        padding: 12,
-        marginTop: 8,
-        alignItems: 'center',
+    sheetBackground: {
+        backgroundColor: '#FFF'
     },
-    bottomSheetContent: {
+    handleIndicator: {
+        backgroundColor: '#C8C7D2',
+        width: 42
+    },
+    sheetContent: {
         flex: 1,
-        padding: 16,
+        paddingHorizontal: 24,
+        paddingTop: 12
+    },
+    sheetTitle: {
+        fontSize: 22,
+        fontWeight: 'bold',
+        color: '#292640',
+        marginBottom: 8
     },
     priorityOption: {
-        paddingVertical: 14,
-        borderBottomWidth: 1,
-        borderBottomColor: '#eee',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: 16,
+        borderWidth: 1,
+        borderColor: '#E5E3F0',
+        borderRadius: 12,
+        marginBottom: 10
     },
+    selectedOption: {
+        backgroundColor: '#EFEDFF',
+        borderColor: '#5B4AE8'
+    },
+    selectedText: {
+        color: '#5144D8',
+        fontWeight: 'bold'
+    }
 });
