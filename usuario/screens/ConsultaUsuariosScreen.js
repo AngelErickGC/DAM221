@@ -1,29 +1,37 @@
 import React from 'react';
-import {SafeAreaView,View,Text,FlatList,StyleSheet,
-} from 'react-native';
+import { SafeAreaView, View, Text, FlatList, StyleSheet, Pressable } from 'react-native';
+import { router } from 'expo-router';
 
 export default function ConsultaUsuariosScreen() {
 
   const usuarios = [
     { id: '1', nombre: 'Isay Guerra', edad: 22 },
     { id: '2', nombre: 'Ana López', edad: 19 },
-    { id: '3', nombre: 'Carlos Gonzalez', edad: 25 },
-    { id: '4', nombre: 'Bjork Guerra', edad: 21 },
-    { id: '5', nombre: 'Luisa Martínez', edad: 28 },
   ];
 
   const renderTarjeta = ({ item }) => (
-    <View style={styles.card}>
 
-      <Text style={styles.nombre}>{item.nombre}</Text>
+    <Pressable onPress={() => router.push({
+      pathname: "/detalle",
+      params: { id: item.id, nombre: item.nombre, edad: item.edad }
+    })}
+    
+    >
 
-      <View style={styles.linea}></View>
+      <View style={styles.card}>
 
-      <Text style={styles.info}>
-        Edad: {item.edad} años
-      </Text>
+        <Text style={styles.nombre}>{item.nombre}</Text>
 
-    </View>
+        <View style={styles.linea}></View>
+
+        <Text style={styles.info}>
+          Edad: {item.edad} años
+
+        </Text>
+
+      </View>
+
+    </Pressable>
   );
 
   return (
@@ -44,7 +52,7 @@ export default function ConsultaUsuariosScreen() {
 
     </SafeAreaView>
   );
-  
+
 }
 
 const styles = StyleSheet.create({
