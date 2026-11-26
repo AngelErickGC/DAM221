@@ -7,11 +7,12 @@ export default function DetalleUsuarioScreen() {
 
   const { id, nombre, edad } = useLocalSearchParams();
 
-  const actualizarUsuario = () => {}
+  const actualizarUsuario = () => {
     router.push({
-      pathname:"/actualiza",
-      params:{id: id,nombre: nombre,edad: edad} 
-    })
+      pathname: "/actualiza",
+      params: { id, nombre, edad },
+    });
+  };
 
    // Estado para mostrar u ocultar el modal
   const [modalVisible, setModalVisible] = useState(false);
